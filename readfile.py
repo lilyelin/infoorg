@@ -49,6 +49,71 @@ def findList(df, prog):
 	return tempList
 
 
+def findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL):
+	javaList = []
+	pythonList = []
+	cList = []
+	cppList = []
+	rList = []
+	d3List = []
+	sqlList = []
+	progList = []
+	tempList = []
+
+	if vJava==True:
+		progList.append('Java')
+	if vPython==True:
+		progList.append('Python')
+	if vC==True:
+		progList.append('C')
+	if vCPP==True:
+		progList.append('C++')
+	if vR==True:
+		progList.append('R')
+	if vD3==True:
+		progList.append('D3.js')
+	if vSQL==True:
+		progList.append('SQL')
+
+	for i, elmt in enumerate(progList):
+		#print(elmt)
+		if elmt=='Java':
+			javaList = findList(rbook, elmt)
+			tempList.append(javaList)
+		elif elmt=='Python':
+			pythonList = findList(rbook, elmt)
+			tempList.append(pythonList)
+		elif elmt=='C':
+			cList = findList(rbook, elmt)
+			tempList.append(cList)
+		elif elmt=='C++':
+			cppList = findList(rbook, elmt)
+			tempList.append(cppList)
+		elif elmt=='R':
+			rList = findList(rbook, elmt)
+			tempList.append(rList)
+		elif elmt=='D3.js':
+			d3List = findList(rbook, elmt)
+			tempList.append(d3List)
+		elif elmt=='SQL':
+			sqlList = findList(rbook, elmt)
+			tempList.append(sqlList)
+		else:
+			print("Error Progaming types!")
+
+	progList = set(tempList[0])
+	for s in tempList[1:]:
+		progList.intersection_update(s)
+
+	print(javaList)
+	print(pythonList)
+	print(cList)
+	print(cppList)
+	print(rList)
+	print(d3List)
+	print(sqlList)
+	#print(progList)
+	return progList
 
 #-------------------- main --------------------#
 # Usage: python readfile.py 1 --java True --python True --c True --cpp True --r True --d3 True --sql True
@@ -69,6 +134,7 @@ def main():
 
 	args = parser.parse_args()
 
+	# DEBUG: check input arguments
 	"""
 	print("============================")
 	print("Mode: ", args.mode)
@@ -111,64 +177,16 @@ def main():
 	#print(rows)
 	#print(column)
 	#print(rbook.columns)
-	# 
-	#print(rbook.Java)
-	#print(rbook['Java'])
+	progList = []
+	if (vMode==1):
+		progList = findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL)
+	print(progList)
 
-	"""
-	javaList = []
-	if vJava==True:
-		lookup = 'Java'
-		for i, elmt in enumerate(rbook[lookup]):
-			if elmt==True:
-				javaList.append(i)
-				#print(i, rbook['Name'][i])
-	print(javaList)
-	"""
-
-	javaList = []
-	if vJava==True:
-		lookup = 'Java'
-		javaList = findList(rbook, lookup)
-	print(javaList)
-
-	pythonList = []
-	if vPython==True:
-		lookup = 'Python'
-		pythonList = findList(rbook, lookup)
-	print(pythonList)
-
-	cList = []
-	if vC==True:
-		lookup = 'C'
-		cList = findList(rbook, lookup)
-	print(cList)
-
-	cppList = []
-	if vCPP==True:
-		lookup = 'C++'
-		cppList = findList(rbook, lookup)
-	print(cppList)
-
-	rList = []
-	if vR==True:
-		lookup = 'R'
-		rList = findList(rbook, lookup)
-	print(rList)
-
-	d3List = []
-	if vD3==True:
-		lookup = 'D3.js'
-		d3List = findList(rbook, lookup)
-	print(d3List)
-
-	sqlList = []
-	if vSQL==True:
-		lookup = 'SQL'
-		sqlList = findList(rbook, lookup)
-	print(sqlList)
-
-
+	# DEBUG: check function 1
+	
+	for i, elmt in enumerate(progList):
+		print(rbook['Name'][elmt])
+	
 
 
 main()
