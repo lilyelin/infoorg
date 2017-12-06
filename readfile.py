@@ -15,19 +15,17 @@ from sklearn.model_selection import train_test_split
 import os.path
 import argparse
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 #-------------------- make inverted index --------------------#
+# might be included later
 """
 Input: a list of movies descriptions as strings
 Output: a dictionary that maps each word in any document to the set consisting of the
 		movie ids (ie, the index in the strlist) for all movie descriptions containing the word.
-
-Example:
->>> makeInvertedIndex(['hello world','hello','hello cat','hellolot of cats'])
->>> {'hello': {0, 1, 2}, 'cat': {2}, 'of': {3}, 'world': {0}, 'cats': {3}, 'hellolot': {3}}
 """
 def makeInvertedIndex(strlist):
-	
 	#strlist = strlist[:3]
 	InvDict = {}
 	for tweetKey, tweetText in enumerate(strlist):
@@ -105,6 +103,8 @@ def findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL):
 	for s in tempList[1:]:
 		progList.intersection_update(s)
 
+	# DEBUG: check each program list
+	"""
 	print(javaList)
 	print(pythonList)
 	print(cList)
@@ -113,7 +113,63 @@ def findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL):
 	print(d3List)
 	print(sqlList)
 	#print(progList)
+	"""
 	return progList
+
+"""
+def findTFIDF():
+	tfidf = TfidfVectorizer().fit_transform(description_list)
+	tfidf
+
+def cosSim():
+	cosine_similarities = cosine_similarity(tfidf[0:1], tfidf).flatten()
+	cosine_similarities
+
+	most_similar_movie_indices = cosine_similarities.argsort()[:-5:-1]
+	most_similar_movie_indices
+
+	cosine_similarities[most_similar_movie_indices]
+
+def findSim(rbook):
+	sim_list = list(rbook.Interests+' '+rbook.Industry+' '+rbook.Tools+' '+rbook['Undergrad Majors']+' '+rbook['Seeking (Intern, Full-time)'])
+	#print(sim_list)
+"""
+
+def sameInterest(rbook, name):
+	cand_list =[]
+	new_list = []
+	cand_index = rbook.loc[rbook['Name']==name].index[0]
+	#print(cand_index)
+	#print(name)
+
+	for i, elmt in enumerate(rbook['Name']):
+		if rbook['Product Management'][cand_index]==True:
+			if rbook['Product Management'][i]==True:
+				cand_list.append(i)
+		if rbook['Data Science'][cand_index]==True:
+			if rbook['Data Science'][i]==True:
+				cand_list.append(i)
+		if rbook['Policy'][cand_index]==True:
+			if rbook['Policy'][i]==True:
+				cand_list.append(i)
+		if rbook['User Experience'][cand_index]==True:
+			if rbook['User Experience'][i]==True:
+				cand_list.append(i)
+		if rbook['Consulting'][cand_index]==True:
+			if rbook['Consulting'][i]==True:
+				cand_list.append(i)
+		if rbook['Engineering'][cand_index]==True:
+			if rbook['Engineering'][i]==True:
+				cand_list.append(i)
+
+	for i in cand_list:
+		if i not in new_list:
+			new_list.append(i)
+	new_list.remove(cand_index)
+	#print(cand_list)
+	#print(new_list)
+	return new_list
+
 
 #-------------------- main --------------------#
 # Usage: python readfile.py 1 --java True --python True --c True --cpp True --r True --d3 True --sql True
@@ -122,7 +178,7 @@ def main():
 	# ex: python xx.py 1 --java True --python False
 	#if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument("mode", help="mode", choices=["1", "2", "3"])
+	parser.add_argument("mode", help="mode", choices=["1", "2", "3", "4"])
 	parser.add_argument("--java", help="java", choices=["True", "False"], default=False)
 	parser.add_argument("--python", help="python", choices=["True", "False"], default=False)
 	parser.add_argument("--c", help="c", choices=["True", "False"], default=False)
@@ -130,7 +186,7 @@ def main():
 	parser.add_argument("--r", help="r", choices=["True", "False"], default=False)
 	parser.add_argument("--d3", help="d3", choices=["True", "False"], default=False)
 	parser.add_argument("--sql", help="sql", choices=["True", "False"], default=False)
-	parser.add_argument("--name", help="name")
+	parser.add_argument("--name", help="name", default='Dylan R. Fox')
 
 	args = parser.parse_args()
 
@@ -171,22 +227,32 @@ def main():
 		print("File does NOT exist!")
 
 	rbook = pd.read_csv(fname, low_memory=False, encoding = "ISO-8859-1")
+	
 	#rbook = rbook.head() #temp for debug
 	rows, column = rbook.shape
 	#print(rbook)
 	#print(rows)
 	#print(column)
 	#print(rbook.columns)
-	progList = []
+	nameList = [1, 2, 3]
 	if (vMode==1):
-		progList = findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL)
-	print(progList)
+		nameList = findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL)
+	elif (vMode==2):
+		#find similar
+		print("Mode 2")
+	elif (vMode==3):
+		#find dissimilar
+		print("Mode 3")
+	elif (vMode==4):
+		#find same interest
+		print("Mode 4")
+		nameList = sameInterest(rbook, vName)
 
-	# DEBUG: check function 1
-	
-	for i, elmt in enumerate(progList):
+	# OUTPUT: name list
+	print()
+	print("Output:")
+	for i, elmt in enumerate(nameList):
 		print(rbook['Name'][elmt])
 	
-
 
 main()
