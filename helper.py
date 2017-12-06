@@ -36,6 +36,20 @@ class ResumeCollection:
 	def get_df():
 		return df
 
+	def contains_name(name):
+		target_row = df[df['Name']==name]
+		if len(target_row) < 1:
+			return False
+		else:
+			return True
+
+	def get_target_row(name):
+		target_row = df[df['Name']==name]
+		if len(target_row) < 1:
+			return None
+		else:
+			return target_row
+
 	def __init__(self, row_length, col_length, df):
 		self.rlen = row_length
 		self.clen = col_length
