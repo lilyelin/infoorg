@@ -49,4 +49,17 @@ def read_dataset():
 	resumes = ResumeCollection(rows, columns, rbook)
 	return resumes
 
+def get_names(collection, list_of_indices, name):
+	df = collection.df
+	new_list = []
+	name_list = []
+	cand_index = df.loc[df['Name']==name].index[0]
+	for i in list_of_indices:
+		if i not in new_list:
+			new_list.append(i)
+		if (i==cand_index):
+			new_list.remove(i)
+	for i, elmt in enumerate(new_list):
+		name_list += [df['Name'][elmt]]
+	return name_list
 
