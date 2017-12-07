@@ -154,8 +154,12 @@ def index_of_least_similar(cos_results, N):
 
 # Given list of indices, return corresponding
 # names from df in order
-def convert_ind_to_names(list):
-	return None
+def convert_ind_to_names(list, collection):
+	res_names = []
+	df = collection.df
+	for index in list:
+		res_names += [df['Name'][index]]
+	return res_names
 
 
 ######################
