@@ -39,6 +39,7 @@ def makeInvertedIndex(strlist):
 	return InvDict
 
 
+#-------------------- Function 1 --------------------#
 def findList(df, prog):
 	tempList = []
 	for i, elmt in enumerate(df[prog]):
@@ -116,6 +117,7 @@ def findProg(rbook, vJava, vPython, vC, vCPP, vR, vD3, vSQL):
 	"""
 	return progList
 
+#-------------------- Function 2 --------------------#
 """
 def findTFIDF():
 	tfidf = TfidfVectorizer().fit_transform(description_list)
@@ -129,15 +131,91 @@ def cosSim():
 	most_similar_movie_indices
 
 	cosine_similarities[most_similar_movie_indices]
-
-def findSim(rbook):
-	sim_list = list(rbook.Interests+' '+rbook.Industry+' '+rbook.Tools+' '+rbook['Undergrad Majors']+' '+rbook['Seeking (Intern, Full-time)'])
-	#print(sim_list)
 """
 
+def findSim(rbook, name):
+	nameList = []
+	sim_list = list(rbook.Industry+' '+rbook.Interests+' '+rbook.Tools+' '+rbook['Undergrad Majors']+' '+rbook['Seeking (Intern, Full-time)'])
+	for i, elmt in enumerate(sim_list):
+		if (rbook['UX Designer'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' UX Designer'
+		if (rbook['UX Researcher'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' UX Researcher'
+		if (rbook['Databases'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Databases'
+		if (rbook['Machine Learning'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Machine Learning'
+		if (rbook['Data warehousing'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Data warehousing'
+		if (rbook['Leadership'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Leadership'
+		if (rbook['Business'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Business'
+		if (rbook['Teamwork'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Teamwork'
+	#print(sim_list)
+	idx = makeInvertedIndex(sim_list)
+	#print(idx)
+	
+	tfidf = TfidfVectorizer().fit_transform(sim_list)
+	#print(tfidf)
+
+	cand_index = rbook.loc[rbook['Name']==name].index[0]
+	#print(cand_index)
+
+	cosine_similarities = cosine_similarity(tfidf[cand_index:cand_index+1], tfidf).flatten()
+	#cosine_similarities = cosine_similarity(tfidf[0:1], tfidf).flatten()
+	#print(cosine_similarities)
+
+	most_similar_ppl = cosine_similarities.argsort()[:-5:-1]
+	#print(most_similar_ppl)
+	#print(cosine_similarities[most_similar_ppl])
+	return most_similar_ppl
+
+#-------------------- Function 3 --------------------#
+def findDis(rbook, name):
+	nameList = []
+	sim_list = list(rbook.Industry+' '+rbook.Interests+' '+rbook.Tools+' '+rbook['Undergrad Majors']+' '+rbook['Seeking (Intern, Full-time)'])
+	for i, elmt in enumerate(sim_list):
+		if (rbook['UX Designer'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' UX Designer'
+		if (rbook['UX Researcher'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' UX Researcher'
+		if (rbook['Databases'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Databases'
+		if (rbook['Machine Learning'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Machine Learning'
+		if (rbook['Data warehousing'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Data warehousing'
+		if (rbook['Leadership'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Leadership'
+		if (rbook['Business'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Business'
+		if (rbook['Teamwork'][i] >= 0):
+			sim_list[i] = str(sim_list[i])+' Teamwork'
+	#print(sim_list)
+	idx = makeInvertedIndex(sim_list)
+	#print(idx)
+	
+	tfidf = TfidfVectorizer().fit_transform(sim_list)
+	#print(tfidf)
+
+	cand_index = rbook.loc[rbook['Name']==name].index[0]
+	#print(cand_index)
+
+	cosine_similarities = cosine_similarity(tfidf[cand_index:cand_index+1], tfidf).flatten()
+	#cosine_similarities = cosine_similarity(tfidf[0:1], tfidf).flatten()
+	#print(cosine_similarities)
+
+	most_similar_ppl = cosine_similarities.argsort()[:5:1]
+	#print(most_similar_ppl)
+	#print(cosine_similarities[most_similar_ppl])
+	return most_similar_ppl
+
+#-------------------- Function 4 --------------------#
 def sameInterest(rbook, name):
 	cand_list =[]
-	new_list = []
+	#new_list = []
 	cand_index = rbook.loc[rbook['Name']==name].index[0]
 	#print(cand_index)
 	#print(name)
@@ -162,21 +240,33 @@ def sameInterest(rbook, name):
 			if rbook['Engineering'][i]==True:
 				cand_list.append(i)
 
+	"""
 	for i in cand_list:
 		if i not in new_list:
 			new_list.append(i)
 	new_list.remove(cand_index)
+	"""
 	#print(cand_list)
 	#print(new_list)
-	return new_list
-
+	return cand_list
 
 #-------------------- main --------------------#
-# Usage: python readfile.py 1 --java True --python True --c True --cpp True --r True --d3 True --sql True
+"""
+Usage: 
+python readfile.py 1 --java True --python True --c True --cpp True --r True --d3 True --sql True
+python readfile.py 4 --name 'Jeffery Chih-Chuan Yu'
+"""
 def main():
 	# read arguments
 	# ex: python xx.py 1 --java True --python False
 	#if __name__ == "__main__":
+	print("Welcome to the resume book retrieval system")
+	print("We provide 4 efficient way to find pontential candidates.")
+	print("Usage Example:")
+	print("Mode 1: python readfile.py 1 --java True --python True --c True --cpp True --r True --d3 True --sql True")
+	print("Mode 2: python readfile.py 2 --name 'Jeffery Chih-Chuan Yu'")
+	print("Mode 3: python readfile.py 3 --name 'Lily E. Lin'")
+	print("Mode 4: python readfile.py 4 --name 'Dylan R. Fox'")
 	parser = argparse.ArgumentParser()
 	parser.add_argument("mode", help="mode", choices=["1", "2", "3", "4"])
 	parser.add_argument("--java", help="java", choices=["True", "False"], default=False)
@@ -240,19 +330,29 @@ def main():
 	elif (vMode==2):
 		#find similar
 		print("Mode 2")
+		nameList = findSim(rbook, vName)
 	elif (vMode==3):
 		#find dissimilar
 		print("Mode 3")
+		nameList = findDis(rbook, vName)
 	elif (vMode==4):
 		#find same interest
-		print("Mode 4")
+		#print("Mode 4")
 		nameList = sameInterest(rbook, vName)
 
+	
 	# OUTPUT: name list
 	print()
 	print("Output:")
-	for i, elmt in enumerate(nameList):
+	new_list = []
+	cand_index = rbook.loc[rbook['Name']==vName].index[0]
+	for i in nameList:
+		if i not in new_list:
+			new_list.append(i)
+		if (i==cand_index):
+			new_list.remove(i)
+
+	for i, elmt in enumerate(new_list):
 		print(rbook['Name'][elmt])
 	
-
 main()
