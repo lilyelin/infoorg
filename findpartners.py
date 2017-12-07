@@ -51,23 +51,33 @@ def renorm_row(target_row, ith_row):
 	# 24-29 is boolean
 	# 30-31 is string
 	# 32-33 is boolean
-
 	for j in range(6, len(target_row)):
 		target_j = target_row[j]
 		ith_j = ith_row[j]
-		if isinstance(target_j, str):
+		# check for "nan"
+		# if target is null then ith will be 0, since it cannot be known
+		# if target is not null but ith is null, then 0, since not same
+		# if either target or ith or nan, then it should be set to 0
+		if target_j=="nan" or ith_j=="nan":
+			norm_result += [0]
+		elif isinstance(target_j, str):
 			# norm string
-			norm_strings(target_j, ith_j)
-		if isinstance(target_j, numpy.bool_):
+			#print("str")
+			norm_result += [norm_strings(target_j, ith_j)]
+		elif isinstance(target_j, numpy.bool_):
 			# norm bool
-			norm_boolean(target_j, ith_j)
-		if isinstance(target_j, numpy.int64):
+			norm_result += [norm_boolean(target_j, ith_j)]
+		elif isinstance(target_j, numpy.int64):
 			# norm integer
-			norm_result += norm_years_of_experience(target_j, ith_j)
+			#print("int")
+			norm_result += [norm_years_of_experience(target_j, ith_j)]
 		else:
 			#something is wrong with the values here
 			# do something
-			norm_result += 0
+			print("other")
+			print(j)
+			print(target_j)
+			norm_result += [0]
 	return norm_result
 
 # add 1 to values to shift everything
@@ -82,7 +92,6 @@ def renorm_row(target_row, ith_row):
 # who are both experienced than those with less experience.
 def norm_years_of_experience(target_value, ith_value):
 	new_norm = 0
-
 	return new_norm
 
 # NA will be treated as 0s
@@ -92,8 +101,6 @@ def norm_years_of_experience(target_value, ith_value):
 # and ith will be 0, since nothing can be known about similarity
 def norm_strings(target_value, ith_value):
 	new_norm = 0
-
-	
 	return new_norm
 
 # Target boolean will be 1 and ith will be 1 if it matches
@@ -102,7 +109,6 @@ def norm_boolean(target_value, ith_value):
 	new_norm = 0
 	if target_value==ith_value:
 		new_norm = 1
-
 	return new_norm
 
 
