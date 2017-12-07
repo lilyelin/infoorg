@@ -29,28 +29,29 @@ def cosSim():
 	cosine_similarities[most_similar_movie_indices]
 """
 
-def findSim(rbook, name, N, options=None):
+def find_tfidf_sim(collection, name, N, options=None):
+	df = collection.df
 	nameList = []
-	sim_list = list(rbook.Industry+' '+rbook.Interests+' '+rbook.Tools+' '+rbook['Undergrad Majors']+' '+rbook['Seeking (Intern, Full-time)'])
+	sim_list = list(df['Industry']+' '+df['Interests']+' '+df['Tools']+' '+df['Undergrad Majors']+' '+df['Seeking (Intern, Full-time)'])
 	for i, elmt in enumerate(sim_list):
-		if (rbook['UX Designer'][i] >= 0):
+		if (df['UX Designer'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' UX Designer'
-		if (rbook['UX Researcher'][i] >= 0):
+		if (df['UX Researcher'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' UX Researcher'
-		if (rbook['Databases'][i] >= 0):
+		if (df['Databases'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Databases'
-		if (rbook['Machine Learning'][i] >= 0):
+		if (df['Machine Learning'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Machine Learning'
-		if (rbook['Data warehousing'][i] >= 0):
+		if (df['Data warehousing'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Data warehousing'
-		if (rbook['Leadership'][i] >= 0):
+		if (df['Leadership'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Leadership'
-		if (rbook['Business'][i] >= 0):
+		if (df['Business'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Business'
-		if (rbook['Teamwork'][i] >= 0):
+		if (df['Teamwork'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Teamwork'
 	tfidf = TfidfVectorizer().fit_transform(sim_list)
-	cand_index = rbook.loc[rbook['Name']==name].index[0]
+	cand_index = df.loc[df['Name']==name].index[0]
 	cosine_similarities = cosine_similarity(tfidf[cand_index:cand_index+1], tfidf).flatten()
 	most_similar_ppl = cosine_similarities.argsort()[:-N-2:-1]
 	sim_names = get_names(test, most_similar_ppl, name)
@@ -62,28 +63,29 @@ def findSim(rbook, name, N, options=None):
 	#return most_similar_ppl
 
 #-------------------- Function 3 --------------------#
-def findDis(rbook, name, N, options=None):
+def find_tfidf_dis(collection, name, N, options=None):
+	df = collection.df
 	nameList = []
-	sim_list = list(rbook.Industry+' '+rbook.Interests+' '+rbook.Tools+' '+rbook['Undergrad Majors']+' '+rbook['Seeking (Intern, Full-time)'])
+	sim_list = list(df.Industry+' '+df.Interests+' '+df.Tools+' '+df['Undergrad Majors']+' '+df['Seeking (Intern, Full-time)'])
 	for i, elmt in enumerate(sim_list):
-		if (rbook['UX Designer'][i] >= 0):
+		if (df['UX Designer'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' UX Designer'
-		if (rbook['UX Researcher'][i] >= 0):
+		if (df['UX Researcher'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' UX Researcher'
-		if (rbook['Databases'][i] >= 0):
+		if (df['Databases'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Databases'
-		if (rbook['Machine Learning'][i] >= 0):
+		if (df['Machine Learning'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Machine Learning'
-		if (rbook['Data warehousing'][i] >= 0):
+		if (df['Data warehousing'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Data warehousing'
-		if (rbook['Leadership'][i] >= 0):
+		if (df['Leadership'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Leadership'
-		if (rbook['Business'][i] >= 0):
+		if (df['Business'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Business'
-		if (rbook['Teamwork'][i] >= 0):
+		if (df['Teamwork'][i] >= 0):
 			sim_list[i] = str(sim_list[i])+' Teamwork'
 	tfidf = TfidfVectorizer().fit_transform(sim_list)
-	cand_index = rbook.loc[rbook['Name']==name].index[0]
+	cand_index = df.loc[df['Name']==name].index[0]
 	cosine_similarities = cosine_similarity(tfidf[cand_index:cand_index+1], tfidf).flatten()
 	most_similar_ppl = cosine_similarities.argsort()[:N:1]
 	sim_names = get_names(test, most_similar_ppl, name)
