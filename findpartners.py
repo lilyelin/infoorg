@@ -1,6 +1,7 @@
 from helper import *
 import math
 import numpy
+import numpy as np
 
 
 ######################
@@ -111,61 +112,44 @@ def norm_boolean(target_value, ith_value):
 		new_norm = 1
 	return new_norm
 
-
-
 # Given target row and row_i return cosine similarity
 def cos_sim(target_row, ith_row):
 	# get renorm-ed ith row based on target row, so that
 	# minimum is 0 and maximum is 1
-	renorm_ith = renorm_row(target_row, ith_row)
+	rtv = np.asarray(renorm_row(target_row, ith_row))
 	# if we are confident about renorm_row then just
 	# generate enough 1s
-	renorm_target = renorm_row(target_row, target_row)
+	riv = np.asarray(renorm_row(target_row, target_row))
 	# calculate the cosine similarity
-	# get numerator
-	sum_of_dot_product(renorm_target, renorm_ith)
-	# get denominator
-	denom_of_cos_sim(renorm_target, renorm_ith)
-	return None
-
-def sum_of_dot_product(target_row, ith_row):
-	return None
-
-def sum_of_sqrs(row):
-	return None
-
-def denom_of_cos_sim(target_row, ith_row):
-	target_sqrt = math.sqrt(sum_of_sqrt(target_row))
-	ith_sqrt = math.sqrt(sum_of_sqrt(ith_row))
-	mult_sqrts = target_sqrt*ith_sqrt
-	return mult_sqrts
+	cos_sim = sum(rtv*riv)/(math.sqrt(sum(rtv*rtv))*math.sqrt(sum(riv*riv)))
+	return cos_sim
 
 
 # Given target row, calculate row_i for all other rows
 # Return value should be a list where i place is
 # the row index and value is 
-def calculate_cos_sim(target_row, df):
+def calculate_cos_sim(target_row, collection):
 	cos_results = []
-	for i in range(df.rlen):
-		ith_row = df.iloc[i]
-		cos_results += cos_sim(target_row, ith_row)
+	for i in range(collection.rlen):
+		ith_row = collection.df.iloc[i]
+		cos_results += [cos_sim(target_row, ith_row)]
 	return cos_results
-
-
 
 
 # Given cosine similarity results and value N
 # return N entries of the most similar rows
 # where the entry is the index of the row
 def index_of_most_similar(cos_results, N):
-	return None
+	arr = np.array(cos_results)
+	return arr.argsort()[-N:][::-1]
 
 
 # Given cosine similarity results and value N
 # return N entries of the most dissimilar rows
 # where the entry is the index of the row
 def index_of_least_similar(cos_results, N):
-	return None
+	arr = np.array(cos_results)
+	return arr.argsort()[:N]
 
 
 # Given list of indices, return corresponding
