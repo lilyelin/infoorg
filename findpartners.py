@@ -15,19 +15,37 @@ import numpy as np
 # squared and sqrt of sum of vector components of vector i squared
 ######################
 
+def find_sim_partners(collection, name, N):
+	target_row = get_target_row(collection.df, name)
+	if isinstance(target_row, pd.Series):
+		cos_results = calculate_cos_sim(target_row, collection)
+		sim_index = index_of_most_similar(cos_results, N)
+		sim_names = convert_ind_to_names(sim_index, collection)
+		return sim_names
+	else:
+		return None
 
+def find_dis_partners(collection, name, N):
+	target_row = get_target_row(collection.df, name)
+	if isinstance(target_row, pd.Series):
+		cos_results = calculate_cos_sim(target_row, collection)
+		dis_index = index_of_least_similar(cos_results, N)
+		dis_names = convert_ind_to_names(dis_index, collection)
+		return dis_names
+	else:
+		return None
 
 
 # given a name and a df, identify the row in the df that the name 
 # corresponds with. Otherwise return None.
 def get_target_row(df, name):
-	target_row = df[df['Name']==name]
-	if len(target_row) < 1:
-		return None
-	else:
-		#return target_row.index.item()
+	target_index_list = df.index[df['Name']==name].tolist()
+	if len(target_index_list)>=1:
+		target_index = target_index_list[0]
+		target_row = df.iloc[target_index]
 		return target_row
-
+	else:
+		return None
 
 
 # Renorm row. Given target_row and ith_row
@@ -59,8 +77,10 @@ def renorm_row(target_row, ith_row):
 		# if target is null then ith will be 0, since it cannot be known
 		# if target is not null but ith is null, then 0, since not same
 		# if either target or ith or nan, then it should be set to 0
-		if target_j=="nan" or ith_j=="nan":
-			norm_result += [0]
+		if target_j==ith_j:
+			norm_result += [1]
+		#if math.isnan(target_j) or math.isnan(ith_j):
+		#	norm_result += [0]
 		elif isinstance(target_j, str):
 			# norm string
 			#print("str")
@@ -72,12 +92,14 @@ def renorm_row(target_row, ith_row):
 			# norm integer
 			#print("int")
 			norm_result += [norm_years_of_experience(target_j, ith_j)]
+		elif isinstance(target_j, float) and isinstance(ith_j, float):
+			if math.isnan(target_j) and math.isnan(ith_j):
+				norm_result += [1]
+			else:
+				norm_result += [0]
 		else:
 			#something is wrong with the values here
 			# do something
-			print("other")
-			print(j)
-			print(target_j)
 			norm_result += [0]
 	return norm_result
 
@@ -93,6 +115,22 @@ def renorm_row(target_row, ith_row):
 # who are both experienced than those with less experience.
 def norm_years_of_experience(target_value, ith_value):
 	new_norm = 0
+	adjusted_target = target_value +1
+	adjusted_ith = ith_value+1
+	if adjusted_ith == adjusted_target:
+		new_norm = 1
+	elif adjusted_ith==0 and adjusted_target==0:
+		# if ith is 0 and target is 0 then 1
+		new_norm = 1
+	elif adjusted_ith != 0 and adjusted_target == 0:
+		# if target is 0 and ith is not 0 then 0
+		new_norm = 0
+	elif adjusted_ith >= adjusted_target:
+		# if target is non-zero and ith is >= target, then 1
+		new_norm = 1
+	else:
+		# if target is non-zero and ith is < target then, ith/target
+		new_norm = adjusted_ith/adjusted_target
 	return new_norm
 
 # NA will be treated as 0s
@@ -102,6 +140,17 @@ def norm_years_of_experience(target_value, ith_value):
 # and ith will be 0, since nothing can be known about similarity
 def norm_strings(target_value, ith_value):
 	new_norm = 0
+	if target_value == ith_value:
+		new_norm = 1
+	elif not isinstance(target_value,str) and math.isnan(target_value):
+		new_norm = 0
+	elif not isinstance(ith_value,str) and math.isnan(ith_value):
+		new_norm = 0
+	else:
+		split_target = target_value.lower().replace(',','').split()
+		split_ith = ith_value.lower().replace(',','').split()
+		intersect = set(split_target).intersection(split_ith)
+		new_norm = len(intersect)/len(split_target)
 	return new_norm
 
 # Target boolean will be 1 and ith will be 1 if it matches
@@ -121,7 +170,9 @@ def cos_sim(target_row, ith_row):
 	# generate enough 1s
 	riv = np.asarray(renorm_row(target_row, target_row))
 	# calculate the cosine similarity
-	cos_sim = sum(rtv*riv)/(math.sqrt(sum(rtv*rtv))*math.sqrt(sum(riv*riv)))
+	num = sum(rtv*riv)
+	denom = (math.sqrt(sum(rtv*rtv))*math.sqrt(sum(riv*riv)))
+	cos_sim = num/float(denom)
 	return cos_sim
 
 
@@ -140,8 +191,16 @@ def calculate_cos_sim(target_row, collection):
 # return N entries of the most similar rows
 # where the entry is the index of the row
 def index_of_most_similar(cos_results, N):
+	if N >= len(cos_results)-1:
+		maxN = len(cos_results)
+	else:
+		maxN = N+1
 	arr = np.array(cos_results)
-	return arr.argsort()[-N:][::-1]
+	results = arr.argsort()[-maxN:][::-1]
+	# We only return the N values shifted by one, because
+	# first entry (most similar) will of course be our target row
+	actual_results = arr.argsort()[-maxN:][::-1][1:]
+	return actual_results
 
 
 # Given cosine similarity results and value N
@@ -177,9 +236,9 @@ def add_cos_sim_to_df(target_row, df):
 def renorm(df, name):
 	target_row = get_target_row(df, name)
 	if target_row == None:
-		return None:
+		return None
 	else:
-
+		return None
 	return None
 
 
