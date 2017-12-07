@@ -15,23 +15,37 @@ import numpy as np
 # squared and sqrt of sum of vector components of vector i squared
 ######################
 
-def find_sim_partners(collection, name, N):
+def find_sim_partners(collection, name, N, options=None):
 	target_row = get_target_row(collection.df, name)
 	if isinstance(target_row, pd.Series):
 		cos_results = calculate_cos_sim(target_row, collection)
 		sim_index = index_of_most_similar(cos_results, N)
 		sim_names = convert_ind_to_names(sim_index, collection)
-		return sim_names
+		if options == 'verbose':
+			if N >= len(cos_results)-1:
+				maxN = len(cos_results)
+			else:
+				maxN = N+1
+			cr = np.array(cos_results)
+			select_cr = cr[cr.argsort()[::-1]][1:maxN]
+			return sim_names, select_cr
+		else:
+			return sim_names
 	else:
 		return None
 
-def find_dis_partners(collection, name, N):
+def find_dis_partners(collection, name, N, options=None):
 	target_row = get_target_row(collection.df, name)
 	if isinstance(target_row, pd.Series):
 		cos_results = calculate_cos_sim(target_row, collection)
 		dis_index = index_of_least_similar(cos_results, N)
 		dis_names = convert_ind_to_names(dis_index, collection)
-		return dis_names
+		if options == 'verbose':
+			cr = np.array(cos_results)
+			select_cr = cr[cr.argsort()][:N]
+			return dis_names, select_cr
+		else:
+			return dis_names
 	else:
 		return None
 
@@ -175,7 +189,6 @@ def cos_sim(target_row, ith_row):
 	cos_sim = num/float(denom)
 	return cos_sim
 
-
 # Given target row, calculate row_i for all other rows
 # Return value should be a list where i place is
 # the row index and value is 
@@ -185,6 +198,11 @@ def calculate_cos_sim(target_row, collection):
 		ith_row = collection.df.iloc[i]
 		cos_results += [cos_sim(target_row, ith_row)]
 	return cos_results
+
+# Given cos_results, return ordered list of sims
+# ordered from highest to lowest
+def ordered_results(cos_results):
+	return cos_results[cos_results.argsort()[::-1]]
 
 
 # Given cosine similarity results and value N
