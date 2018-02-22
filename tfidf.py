@@ -54,7 +54,7 @@ def find_tfidf_sim(collection, name, N, options=None):
 	cand_index = df.loc[df['Name']==name].index[0]
 	cosine_similarities = cosine_similarity(tfidf[cand_index:cand_index+1], tfidf).flatten()
 	most_similar_ppl = cosine_similarities.argsort()[:-N-2:-1]
-	sim_names = get_names(test, most_similar_ppl, name)
+	sim_names = get_names(collection, most_similar_ppl, name)
 	select_cr = cosine_similarities[cosine_similarities.argsort()][:-N-2:-1][1:]
 	if options == 'verbose':
 		return sim_names, select_cr
@@ -88,7 +88,7 @@ def find_tfidf_dis(collection, name, N, options=None):
 	cand_index = df.loc[df['Name']==name].index[0]
 	cosine_similarities = cosine_similarity(tfidf[cand_index:cand_index+1], tfidf).flatten()
 	most_similar_ppl = cosine_similarities.argsort()[:N:1]
-	sim_names = get_names(test, most_similar_ppl, name)
+	sim_names = get_names(collection, most_similar_ppl, name)
 	select_cr = cosine_similarities[cosine_similarities.argsort()][:N:1]
 	if options == 'verbose':
 		return sim_names, select_cr
